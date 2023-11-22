@@ -4,7 +4,7 @@ import math
 import serial
 
 # Set up the serial port connection
-ser = serial.Serial('/dev/ttyUSB0', 9600)  # Change this to the correct COM port if needed
+ser = serial.Serial('/dev/tty.usbmodem0E22CF551', 115200)  # Change this to the correct COM port if needed
 
 # start webcam
 cap = cv2.VideoCapture(0)
@@ -27,7 +27,7 @@ while True:
         for box in boxes:
             if box.cls[0].item() == 0.:
                 human_count += 1
-                if human_count > 3:  # Stop processing if more than 3 humans detected
+                if human_count > 1:  # Only process the first human detected
                     break
 
                 x1, y1, x2, y2 = box.xyxy[0]
@@ -45,8 +45,8 @@ while True:
                 centroid_y = (y1 + y2) // 2
                 print("Centroid --->", (centroid_x, centroid_y))
 
-                # Send the centroid values to the serial port
-                ser.write(f"{centroid_x},{centroid_y}\n".encode())
+                if human_count == 1:  # Send the centroid values to the serial port only for the first person
+                    ser.write(f"{centroid_x},{centroid_y}\n\r".encode())
 
                 # draw a dot at the centroid
                 cv2.circle(img, (centroid_x, centroid_y), 5, (0, 255, 0), -1)  # -1 means the circle is filled
